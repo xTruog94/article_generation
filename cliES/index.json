@@ -1,0 +1,36 @@
+{
+    "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+    },
+    "mappings": {
+        "dynamic": "true",
+        "_source": {
+                "enabled": "true"
+            },
+        "properties": {
+            "id": {
+                "type": "keyword"
+            },
+            "url": {
+                "type":"text"
+            },
+            "domain": {
+                "type":"text"
+            },
+            "title": {
+                "type": "text"
+            },
+            "description": {
+                "type": "text"
+            },
+            "content": {
+                "type": "text"
+            },
+            "insertDate": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss"
+            }
+        }
+    }
+}
