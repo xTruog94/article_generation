@@ -43,7 +43,7 @@ class Generate():
         self.generator = PromptGenerate(
             api = "https://opengpts-example-vz4y4ooboq-uc.a.run.app/runs/stream",
             cookie = 'opengpts_user_id=2871570f-833c-46bc-b26a-46dff7e594cd',
-            assistant_id="f58843a7-ed14-4fbc-a375-5867c0fec566"
+            assistant_id="e5785e8a-7acc-4337-89fc-70b80c24bc6c"
             
         )
     def get_article(self, url):
@@ -68,4 +68,3 @@ class Generate():
         related_items, urls = self.find_related(article)
         new_article = self.generator.get_response(article,  related_items[0], related_items[1])
         return new_article, urls[:2]
-# Generate().generate("https://hellobacsi.com/nhan-khoa/benh-nhan-khoa/mo-bong-vong-mac-bao-lau-thi-khoi/")
