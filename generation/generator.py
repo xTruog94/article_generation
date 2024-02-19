@@ -12,7 +12,7 @@ class PromptGenerate():
         self.header = {"Cookie": cookie}
         self.assistant_id = assistant_id
         self.instruction = """
-            Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO 
+            Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
             \n\n\n Bài viết 1: {article1}
             \n\n\n Bài viết 2: {article2} 
         """
@@ -81,7 +81,11 @@ class PromptGenerate():
             else:
                 break
         if message_response is not None:
-            return message_response['content']
+            text = message_response['content']
+            if "```" in text:
+                text = text.replace("```json","")
+                text = text.replace("```","")
+            return json.loads(text)
         else:
             return None
 
