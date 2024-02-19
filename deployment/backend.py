@@ -63,8 +63,13 @@ class Generate():
         urls = [x['url'] for x in related_article]
         return articles, urls
     
-    def generate(self,url):
+    def generate_from_url(self, url: str):
         article = self.get_article(url)
+        related_items, urls = self.find_related(article)
+        new_article = self.generator.get_response(article,  related_items[0], related_items[1])
+        return new_article, urls[:2]
+    
+    def generate_from_text(self, article: str):
         related_items, urls = self.find_related(article)
         new_article = self.generator.get_response(article,  related_items[0], related_items[1])
         return new_article, urls[:2]

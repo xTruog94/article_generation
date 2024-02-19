@@ -13,9 +13,9 @@ articles, urls = major_site.get_article_by_cate(category)
 article_selected = st.selectbox('Lựa chọn bài viết mẫu',options = articles)
 article_index = articles.index(article_selected)
 article_url = urls[article_index]
-print(article_url)
+
 if st.button("Generate"):
-    new_article, urls = generator.generate(article_url)
+    new_article, urls = generator.generate_from_url(article_url)
     if new_article is None:
         st.write("Việc xuất bản gặp chút vấn đề. Vui lòng thử với bài viết khác!")
     else:
