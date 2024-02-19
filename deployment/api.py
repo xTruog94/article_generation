@@ -29,7 +29,7 @@ base_response = {
 def healthcheck():
     return {"status":"ok"}
 
-@app.post("/get_article")
+@app.post("/generate_article")
 def get_article(article: Article) -> dict:
     response = base_response.copy()
     try:
