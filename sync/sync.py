@@ -1,6 +1,6 @@
 from cliES import ElasticClient
 from cliDB import SQLClient
-from config import ElasticConfig, DBConfig
+from configs.server_configs import ElasticConfig, DBConfig
 from utils import Cleaner
 from datetime import datetime
 import json

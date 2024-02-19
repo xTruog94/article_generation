@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 from deployment.backend import Majority, Generate
 import logging
-from configs import APIConfig
+from configs.common_configs import APIConfig
 from pydantic import BaseModel
 
 logging.basicConfig(

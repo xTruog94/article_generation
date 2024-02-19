@@ -2,7 +2,10 @@ from cliES import ElasticClient
 import requests
 from bs4 import BeautifulSoup as bs
 from generation import PromptGenerate
+from configs import common_configs, server_configs
 
+cc = common_configs
+sc = server_configs
 
 class Majority:
     def __init__(self,
@@ -39,11 +42,15 @@ class Majority:
     
 class Generate():
     def __init__(self):
-        self.es_cli = ElasticClient(host = '192.168.0.91', port = 9200, index_name= 'health')
+        self.es_cli = ElasticClient(
+            host = sc.ElasticConfig.host, 
+            port = sc.ElasticConfig.port, 
+            index_name= sc.ElasticConfig.index
+        )
         self.generator = PromptGenerate(
-            api = "https://opengpts-example-vz4y4ooboq-uc.a.run.app/runs/stream",
-            cookie = 'opengpts_user_id=2871570f-833c-46bc-b26a-46dff7e594cd',
-            assistant_id="e5785e8a-7acc-4337-89fc-70b80c24bc6c"
+            api = cc.ChatGPTConfig.api,
+            cookie = cc.ChatGPTConfig.cookie,
+            assistant_id = cc.ChatGPTConfig.assistant_id
             
         )
     def get_article(self, url):

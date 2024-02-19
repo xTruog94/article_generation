@@ -142,3 +142,5 @@ test.*
 logs
 
 database
+
+configs/server_configs.py
