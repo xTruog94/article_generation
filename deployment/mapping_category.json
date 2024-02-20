@@ -1,0 +1,36 @@
+[
+    {
+        "domain":"hellobacsi.com",
+        "categories": {
+            "tieu-duong-dai-thao-duong": "Tiểu đường",
+            "benh-tim-mach": "Bệnh tim mạch",
+            "ho-va-benh-duong-ho-hap": "Bệnh hô hấp",
+            "ung-thu-ung-buou": "Ung thư - Ung bướu",
+            "benh-co-xuong-khop": "Bệnh cơ xương khớp",
+            "di-ung": "Dị ứng",
+            "da-lieu": "Da liễu",
+            "suc-khoe-tinh-duc": "Sức khỏe tình dục",
+            "benh-ve-mau": "Bệnh về máu",
+            "benh-tieu-hoa": "Bệnh tiêu hóa",
+            "benh-truyen-nhiem": "Bệnh truyền nhiễm",
+            "nhan-khoa": "Sức khỏe mắt",
+            "benh-than-va-duong-tiet-nieu": "Bệnh thận và Đường tiết niệu",
+            "benh-nao-he-than-kinh": "Bệnh về não & hệ thần kinh",
+            "an-uong-lanh-manh": "Ăn uống lành mạnh",
+            "the-duc-the-thao": "Thể dục thể thao",
+            "tam-ly-tam-than": "Tâm lý - Tâm thần",
+            "thuoc": "Thuốc và Thực phẩm chức năng",
+            "suc-khoe": "Sức khỏe",
+            "suc-khoe-phu-nu": "Sức khỏe phụ nữ",
+            "benh-tai-mui-hong": "Bệnh tai mũi họng",
+            "nuoi-day-con": "Nuôi dạy con",
+            "mang-thai": "Mang thai",
+            "duoc-lieu": "Dược liệu",
+            "giac-ngu": "Chăm sóc giấc ngủ",
+            "thoi-quen-lanh-manh": "Thói quen lành mạnh",
+            "suc-khoe-nam-gioi": "Sức khỏe nam giới",
+            "suc-khoe-rang-mieng": "Sức khỏe răng miệng",
+            "lao-hoa-lanh-manh": "Lão hóa lạnh mạnh"
+        }
+    }
+]

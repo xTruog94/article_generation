@@ -26,6 +26,7 @@ class ElasticClient:
         res =[]
         for hit in response["hits"]["hits"]:
             res.append({
+                "title": hit["_source"]["title"],
                 "content": hit["_source"]["content"],
                 "url": hit["_source"]["url"]
             })
@@ -73,6 +74,22 @@ class ElasticClient:
             request_timeout = 3000
         )
         return response
+    
+    def get_article_by_domain(self, domain, seed):
+        script ={
+                    "function_score": {
+                        "query" : { 
+                            "match_phrase": {
+                                "domain": domain
+                                } 
+                            },
+                        "random_score": {
+                            "seed": seed
+                        }
+                    }
+                }
+        res = self.base_query(script)
+        return res
 
     def push_data(self, data,):
         self.es.indices.put_settings(index=self.index_name,

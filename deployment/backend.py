@@ -3,6 +3,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 from generation import PromptGenerate
 from configs import common_configs, server_configs
+import json
+import random
 
 cc = common_configs
 sc = server_configs
@@ -41,7 +43,8 @@ class Majority:
         return titles,urls
     
 class Generate():
-    def __init__(self):
+    
+    def __init__(self, master_domain = "hellobacsi.com"):
         self.es_cli = ElasticClient(
             host = sc.ElasticConfig.host, 
             port = sc.ElasticConfig.port, 
@@ -53,7 +56,15 @@ class Generate():
             assistant_id = cc.ChatGPTConfig.assistant_id
             
         )
-    def get_article(self, url):
+        self.cate_slug_to_name = None
+        self.master_domain = master_domain
+        category_mapping = json.load(open("deployment/mapping_category.json"))
+        for item in category_mapping:
+            if item['domain'] == master_domain:
+                self.cate_slug_to_name = item["categories"]
+                break
+            
+    def get_article_from_url(self, url):
         full_article = []
         html = requests.get(url)
         soup = bs(html.text, "lxml")
@@ -62,6 +73,20 @@ class Generate():
             text = div.text
             full_article.append(text)
         return " ".join(full_article)
+    
+    def get_category(self, url):
+        slug = url.split("/")[3]
+        return self.cate_slug_to_name[slug]
+    
+    def get_random_article_from_es(self):
+        content = ''
+        while content == '':
+            seed = random.randint(0,1e6)
+            article = self.es_cli.get_article_by_domain(self.master_domain, seed)[0]
+            content = article['content']
+        if content != '':
+            article['category'] = self.get_category(article['url'])
+        return article
     
     def find_related(self, text, max_length  = 512):
         text = text[:max_length]

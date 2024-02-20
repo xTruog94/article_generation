@@ -30,12 +30,33 @@ def healthcheck():
     return {"status":"ok"}
 
 @app.post("/generate_article")
-def get_article(article: Article) -> dict:
+def gen_article(article: Article) -> dict:
     response = base_response.copy()
     try:
         new_article, urls = generator.generate_from_text(article.content)
         data = {
             "article": new_article,
+            "references": urls
+            }
+        response['data'] = data
+    except Exception as e:
+        response['status_code'] = 500
+        response['message'] = str(e)
+    return response
+
+@app.get("/get_article")
+def get_article() -> dict:
+    response = base_response.copy()
+    try:
+        article_from_es = generator.get_random_article_from_es()
+        new_article, urls = generator.generate_from_text(article_from_es['content'])
+        data = {
+            "article": new_article,
+            "source":{
+                "domain": generator.master_domain,
+                "url": article_from_es['url'],
+                "title": article_from_es['title']
+            },
             "references": urls
             }
         response['data'] = data
