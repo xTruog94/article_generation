@@ -4,6 +4,7 @@ from deployment.backend import Majority, Generate
 import logging
 from configs.common_configs import APIConfig
 from pydantic import BaseModel
+import json
 
 logging.basicConfig(
     filename= APIConfig.log_filename,
@@ -29,7 +30,7 @@ base_response = {
 def healthcheck():
     return {"status":"ok"}
 
-@app.post("/generate_article")
+@app.post("/generate_article", tags=["Article"])
 def gen_article(article: Article) -> dict:
     response = base_response.copy()
     try:
@@ -44,12 +45,13 @@ def gen_article(article: Article) -> dict:
         response['message'] = str(e)
     return response
 
-@app.get("/get_article")
+@app.get("/get_article", tags=["Article"])
 def get_article() -> dict:
     response = base_response.copy()
     try:
         article_from_es = generator.get_random_article_from_es()
         new_article, urls = generator.generate_from_text(article_from_es['content'])
+        new_article['category'] = article_from_es['category']
         data = {
             "article": new_article,
             "source":{
@@ -60,6 +62,23 @@ def get_article() -> dict:
             "references": urls
             }
         response['data'] = data
+    except Exception as e:
+        response['status_code'] = 500
+        response['message'] = str(e)
+    return response
+
+@app.get("/get_category", tags=["Category"])
+def get_category(domain: str = "hellobacsi.com") -> dict:
+    category_mapping = json.load(open("deployment/mapping_category.json"))
+    category = {}
+    for item in category_mapping:
+        if item['domain'] == domain:
+            category = item["categories"]
+            break
+    all_cate = list(category.values())
+    response = base_response.copy()
+    try:
+        response['data'] = all_cate
     except Exception as e:
         response['status_code'] = 500
         response['message'] = str(e)
