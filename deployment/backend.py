@@ -109,10 +109,14 @@ class Generate():
 def get_images(url):
     html = requests.get(url)
     soup = bs(html.text, 'lxml')
-    images = soup.findAll('img')
+    thumbnail = soup.find('meta', attrs= {"name":"twitter:image"})
+    content = soup.find('div', attrs= {"class":"unique-content-wrapper"})
     urls = []
+    if thumbnail is not None:
+        thumbnail = thumbnail['content']
+        images = content.findAll('img')
+        urls.append(thumbnail)
     for image in images:
         url = image['src']
-        if url.endswith(".jpg"):
-            urls.append(url)
+        urls.append(url)
     return urls
