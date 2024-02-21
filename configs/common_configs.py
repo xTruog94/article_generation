@@ -8,4 +8,4 @@ class APIConfig:
 class ChatGPTConfig:
     api = "https://opengpts-example-vz4y4ooboq-uc.a.run.app/runs/stream"
     cookie = 'opengpts_user_id=2871570f-833c-46bc-b26a-46dff7e594cd'
-    assistant_id="05974e46-4b29-4423-82a7-f48a6b6fd822"
+    assistant_id="346197ed-d156-4a25-8200-9d41733ebe85"
