@@ -105,3 +105,14 @@ class Generate():
         related_items, urls = self.find_related(article)
         new_article = self.generator.get_response(article,  related_items[0], related_items[1])
         return new_article, urls[:2]
+
+def get_images(url):
+    html = requests.get(url)
+    soup = bs(html.text, 'lxml')
+    images = soup.findAll('img')
+    urls = []
+    for image in images:
+        url = image['src']
+        if url.endswith(".jpg"):
+            urls.append(url)
+    return urls

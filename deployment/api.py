@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from deployment.backend import Majority, Generate
+from deployment.backend import Generate, get_images
 import logging
 from configs.common_configs import APIConfig
 from pydantic import BaseModel
@@ -52,12 +52,14 @@ def get_article() -> dict:
         article_from_es = generator.get_random_article_from_es()
         new_article, urls = generator.generate_from_text(article_from_es['content'])
         new_article['category'] = article_from_es['category']
+        images = get_images(article_from_es['url'])
         data = {
             "article": new_article,
             "source":{
                 "domain": generator.master_domain,
                 "url": article_from_es['url'],
-                "title": article_from_es['title']
+                "title": article_from_es['title'],
+                "images": images
             },
             "references": urls
             }
