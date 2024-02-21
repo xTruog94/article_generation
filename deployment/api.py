@@ -52,14 +52,13 @@ def get_article() -> dict:
         article_from_es = generator.get_random_article_from_es()
         new_article, urls = generator.generate_from_text(article_from_es['content'])
         new_article['category'] = article_from_es['category']
-        images = get_images(article_from_es['url'])
+        new_article['images'] = get_images(article_from_es['url'])
         data = {
             "article": new_article,
             "source":{
                 "domain": generator.master_domain,
                 "url": article_from_es['url'],
-                "title": article_from_es['title'],
-                "images": images
+                "title": article_from_es['title']
             },
             "references": urls
             }
