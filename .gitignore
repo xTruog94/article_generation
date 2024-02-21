@@ -144,3 +144,4 @@ logs
 database
 
 configs/server_configs.py
+MMO/local_configs.py

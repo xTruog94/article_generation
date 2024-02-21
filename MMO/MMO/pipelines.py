@@ -7,7 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import mysql.connector
-
+from local_configs import DBConfig
 class MmoPipeline:
     def process_item(self, item, spider):
         return item
@@ -16,16 +16,16 @@ class MysqlHealthPipeline:
     
     def __init__(self):
         self.conn = mysql.connector.connect(
-            host = '192.168.0.157',
-            user = 'data',
-            password = "Fr@0PhI0i7ZwF5",
-            database = 'Health',
+            host = DBConfig.host,
+            user = DBConfig.user,
+            password = DBConfig.password,
+            database = DBConfig.database,
             auth_plugin='mysql_native_password'
         )
 
         ## Create cursor, used to execute commands
         self.cur = self.conn.cursor()
-        self.table_name = "healthSite"
+        self.table_name = DBConfig.table
         # self.cur.execute(f"""
         # DROP TABLE IF EXISTS {self.table_name};
         # """)
