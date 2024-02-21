@@ -98,9 +98,11 @@ class Hellobacsi(CrawlSpider):
         return None
 
     def extract_content(self, response):
-        content = response.css("div.body-content").getall()
+        content = response.css("div.unique-content-wrapper")
         if content is not None and len(content) > 0:
-            return content[0]
+            data = content[0].getall()
+            data = "".join(data)
+            return data
         return None
 
     def extract_tags(self, response):
