@@ -149,8 +149,9 @@ class GPTAssistant():
         return response, status_code
     
     def _crop(self, *args, max_length = 512):
-        for i,arg in enumerate(args):
-            args[i] = " ".join(arg.split()[:max_length])
+        response = tuple()
+        for arg in enumerate(args):
+            response = (*response, " ".join(arg.split()[:max_length]))
         return args
     
     def get_response(self, article1, article2, article3):
