@@ -150,7 +150,7 @@ class GPTAssistant():
     
     def _crop(self, *args, max_length = 512):
         response = tuple()
-        for arg in enumerate(args):
+        for arg in args:
             response = (*response, " ".join(arg.split()[:max_length]))
         return args
     
