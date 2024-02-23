@@ -1,7 +1,7 @@
 from cliES import ElasticClient
 import requests
 from bs4 import BeautifulSoup as bs
-from generation import PromptGenerate
+from generation import PromptGenerate, GPTAssistant
 from configs import common_configs, server_configs
 import json
 import random
@@ -44,18 +44,26 @@ class Majority:
     
 class Generate():
     
-    def __init__(self, master_domain = "hellobacsi.com"):
+    def __init__(self, master_domain = "hellobacsi.com", policy = "free"):
         self.es_cli = ElasticClient(
             host = sc.ElasticConfig.host, 
             port = sc.ElasticConfig.port, 
             index_name= sc.ElasticConfig.index
         )
-        self.generator = PromptGenerate(
-            api = cc.ChatGPTConfig.api,
-            cookie = cc.ChatGPTConfig.cookie,
-            assistant_id = cc.ChatGPTConfig.assistant_id
-            
-        )
+        if policy == "free":
+            self.generator = PromptGenerate(
+                api = cc.ChatGPTConfig.api,
+                cookie = cc.ChatGPTConfig.cookie,
+                assistant_id = cc.ChatGPTConfig.assistant_id
+                
+            )
+        elif policy == "paid":
+            self.generator = GPTAssistant(
+                api_key = sc.OpenAIConfig.api_key,
+                assistant_id = sc.OpenAIConfig.assistant_id,
+                max_retry = 3
+                
+            )
         self.cate_slug_to_name = None
         self.master_domain = master_domain
         category_mapping = json.load(open("deployment/mapping_category.json"))
@@ -98,13 +106,13 @@ class Generate():
     def generate_from_url(self, url: str):
         article = self.get_article(url)
         related_items, urls = self.find_related(article)
-        new_article = self.generator.get_response(article,  related_items[0], related_items[1])
-        return new_article, urls[:2]
+        new_article, status_code = self.generator.get_response(article,  related_items[0], related_items[1])
+        return new_article, urls[:2], status_code
     
     def generate_from_text(self, article: str):
         related_items, urls = self.find_related(article)
-        new_article = self.generator.get_response(article,  related_items[0], related_items[1])
-        return new_article, urls[:2]
+        new_article, status_code = self.generator.get_response(article,  related_items[0], related_items[1])
+        return new_article, urls[:2], status_code
 
 def get_images(url):
     html = requests.get(url)

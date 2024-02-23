@@ -14,7 +14,7 @@ logging.basicConfig(
     )
 logger = logging.getLogger(__name__)
 
-generator = Generate()
+generator = Generate(policy = "paid")
 
 app = FastAPI()
 class Article(BaseModel):
@@ -50,19 +50,23 @@ def get_article() -> dict:
     response = base_response.copy()
     try:
         article_from_es = generator.get_random_article_from_es()
-        new_article, urls = generator.generate_from_text(article_from_es['content'])
-        new_article['category'] = article_from_es['category']
-        new_article['images'] = get_images(article_from_es['url'])
-        data = {
-            "article": new_article,
-            "source":{
-                "domain": generator.master_domain,
-                "url": article_from_es['url'],
-                "title": article_from_es['title']
-            },
-            "references": urls
-            }
-        response['data'] = data
+        new_article, urls, status_code = generator.generate_from_text(article_from_es['content'])
+        if status_code == 200:
+            new_article['category'] = article_from_es['category']
+            new_article['images'] = get_images(article_from_es['url'])
+            data = {
+                "article": new_article,
+                "source":{
+                    "domain": generator.master_domain,
+                    "url": article_from_es['url'],
+                    "title": article_from_es['title']
+                },
+                "references": urls
+                }
+            response['data'] = data
+        else:
+            response['status_code'] = status_code
+            response['message'] = new_article
     except Exception as e:
         response['status_code'] = 500
         response['message'] = str(e)

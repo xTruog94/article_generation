@@ -3,6 +3,8 @@ import random
 import requests
 import time
 import json
+from openai import OpenAI
+import os
 
 class PromptGenerate():
     
@@ -85,7 +87,92 @@ class PromptGenerate():
             if "```" in text:
                 text = text.replace("```json","")
                 text = text.replace("```","")
-            return json.loads(text)
+            return json.loads(text), 200
         else:
-            return None
+            return None, 500
+class GPTAssistant():
+    
+    def __init__(self, api_key, assistant_id, thread_id = None, max_retry= 3):
+        self.max_retry = max_retry
+        os.environ['OPENAI_API_KEY'] = api_key
+        self.assistant_id = assistant_id
+        self.instruction = """
+            Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
+            \n\n\n Bài viết 1: {article1}
+            \n\n\n Bài viết 2: {article2} 
+        """
+        self.thread_id = thread_id
+        self.client = OpenAI()
+    
+    def create_new_thread(self):
+        thread = self.client.beta.threads.create(
+            messages=[{
+                "role": "user",
+                "content":"hi"
+                
+            }]
+                )
+        self.thread_id = thread.id
+        
+    def process(self, response):
+        response = response[-5]
+        response = response.replace("data: ","")
+        response = json.loads(response)["messages"][-1]["additional_kwargs"]["agent"]["return_values"]["output"]
+        return response
 
+    def wait_for_run_completion(self, run_id, sleep_interval=5, max_runtime = 600):
+        """
+        Waits for a run to complete
+        :param thread_id: The ID of the thread.
+        :param run_id: The ID of the run.
+        :param sleep_interval: Time in seconds to wait between checks.
+        """
+        response = None
+        s = time.time()
+        response = "An error occurred while retrieving the run"
+        status_code = 500
+        while True:
+            try:
+                if time.time()-s > max_runtime:
+                    break
+                run = self.client.beta.threads.runs.retrieve(thread_id = self.thread_id, run_id = run_id)
+                if run.completed_at:
+                    messages = self.client.beta.threads.messages.list(thread_id=self.thread_id)
+                    last_message = messages.data[0]
+                    response = last_message.content[0].text.value
+                    status_code = 200
+                    break
+                time.sleep(sleep_interval)
+            except Exception as e:
+                response = str(e)
+                break
+        return response, status_code
+    
+    def _crop(self, *args, max_lenth = 512):
+        for i,arg in enumerate(args):
+            args[i] = " ".join(arg.split()[:max_lenth])
+        return args
+    
+    def get_response(self, article1, article2, article3):
+        message_response = None
+        article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)
+        message_input = self.instruction.format(article1 = article1, article2 = article2, article3 = article3)
+        self.thread_id if self.thread_id is not None else self.create_new_thread()
+        message = self.client.beta.threads.messages.create(
+            thread_id = self.thread_id ,
+            role = "user",
+            content = message_input
+        )
+        run = self.client.beta.threads.runs.create(
+                thread_id = self.thread_id,
+                assistant_id = self.assistant_id
+            )
+        message_response, status_code = self.wait_for_run_completion(run.id)
+        print(message_response)
+        if status_code == 200:
+            if "```" in message_response:
+                text = text.replace("```json","")
+                text = text.replace("```","")
+            return json.loads(text), 200
+        else:
+            return message_response, 500

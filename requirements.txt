@@ -4,3 +4,4 @@ scrapy_proxy_pool==0.1.9
 mysql-connector-python==8.0.33
 fastapi
 uvicorn
+openai
