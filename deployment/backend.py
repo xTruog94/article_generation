@@ -1,7 +1,7 @@
 from cliES import ElasticClient
 import requests
 from bs4 import BeautifulSoup as bs
-from generation import PromptGenerate, GPTAssistant
+from generation import PromptGenerate, GPTAssistant, GeminiAssistant
 from configs import common_configs, server_configs
 import json
 import random
@@ -61,6 +61,12 @@ class Generate():
             self.generator = GPTAssistant(
                 api_key = sc.OpenAIConfig.api_key,
                 assistant_id = sc.OpenAIConfig.assistant_id,
+                max_retry = 3
+                
+            )
+        elif policy == "gemini":
+            self.generator = GeminiAssistant(
+                api_key = sc.GoogleConfig.api_key,
                 max_retry = 3
                 
             )

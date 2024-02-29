@@ -14,7 +14,7 @@ logging.basicConfig(
     )
 logger = logging.getLogger(__name__)
 
-generator = Generate(policy = "paid")
+generator = Generate(policy = "gemini")
 
 app = FastAPI()
 class Article(BaseModel):

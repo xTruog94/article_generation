@@ -5,6 +5,8 @@ import time
 import json
 from openai import OpenAI
 import os
+import textwrap
+import google.generativeai as genai
 
 class PromptGenerate():
     
@@ -174,6 +176,71 @@ class GPTAssistant():
             if "```" in message_response:
                 text = text.replace("```json","")
                 text = text.replace("```","")
+            return json.loads(text), 200
+        else:
+            return message_response, 500
+
+class GeminiAssistant():
+    
+    def __init__(self, api_key, max_retry= 3, **generation_config):
+        self.max_retry = max_retry
+        os.environ['GOOGLE_API_KEY'] = api_key
+        genai.configure(api_key=api_key)
+        self.instruction = """
+            Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
+            Câu trả lời của bạn sẽ ở dạng json với format: {{"title":"Chủ đề bài viết", "sapo":"Tóm tắt nội dung bài viết trong 2-3 câu", "content":"Nội dung chính của bài viết dưới dạng html"}}
+            \n\n\n Bài viết 1: {article1}
+            \n\n\n Bài viết 2: {article2}
+            \n\n\n Câu trả lời của bạn: \n
+        """
+        self.generation_config = {
+            "temperature": 0.9,
+            "top_p": 1,
+            "top_k": 1,
+            "max_output_tokens": 2048,
+            }
+        self.safety_settings = [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            ]
+        self.client = genai.GenerativeModel(model_name="gemini-pro",
+                              generation_config= self.generation_config,
+                              safety_settings=self.safety_settings)
+        
+    def process(self, response):
+        response = response[-5]
+        response = response.replace("data: ","")
+        response = json.loads(response)["messages"][-1]["additional_kwargs"]["agent"]["return_values"]["output"]
+        return response
+
+    def _crop(self, *args, max_length = 512):
+        response = tuple()
+        for arg in args:
+            response = (*response, " ".join(arg.split()[:max_length]))
+        return args
+    
+    def get_response(self, article1, article2, article3):
+        message_response = None
+        article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)
+        message_input = self.instruction.format(article1 = article1, article2 = article2, article3 = article3)
+        convo = self.client.start_chat(history=[])
+        convo.send_message(message_input)
+        text = convo.last.text
+        if text is not None:
             return json.loads(text), 200
         else:
             return message_response, 500

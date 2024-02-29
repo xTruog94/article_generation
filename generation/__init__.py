@@ -1,1 +1,1 @@
-from .generator import PromptGenerate, GPTAssistant
+from .generator import PromptGenerate, GPTAssistant, GeminiAssistant
