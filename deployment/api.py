@@ -5,6 +5,8 @@ import logging
 from configs.common_configs import APIConfig
 from pydantic import BaseModel
 import json
+from memoization import cached
+
 
 logging.basicConfig(
     filename= APIConfig.log_filename,

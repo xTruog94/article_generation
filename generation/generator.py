@@ -7,6 +7,7 @@ from openai import OpenAI
 import os
 import textwrap
 import google.generativeai as genai
+from memoization import cached
 
 class PromptGenerate():
     
@@ -75,6 +76,7 @@ class PromptGenerate():
             time.sleep(3)
         return message_response
     
+    @cached(ttl= 120)
     def get_response(self, article1, article2, article3):
         message_response = None
         for i in range(self.max_retry):
@@ -156,6 +158,7 @@ class GPTAssistant():
             response = (*response, " ".join(arg.split()[:max_length]))
         return args
     
+    @cached(ttl= 120)
     def get_response(self, article1, article2, article3):
         message_response = None
         article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)
@@ -232,6 +235,7 @@ class GeminiAssistant():
             response = (*response, " ".join(arg.split()[:max_length]))
         return args
     
+    @cached(ttl= 120)
     def get_response(self, article1, article2, article3):
         message_response = None
         article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)

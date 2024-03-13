@@ -5,6 +5,7 @@ from generation import PromptGenerate, GPTAssistant, GeminiAssistant
 from configs import common_configs, server_configs
 import json
 import random
+from memoization import cached
 
 cc = common_configs
 sc = server_configs
@@ -92,6 +93,7 @@ class Generate():
         slug = url.split("/")[3]
         return self.cate_slug_to_name[slug]
     
+    @cached(ttl= 120)
     def get_random_article_from_es(self):
         content = ''
         while content == '':
@@ -164,7 +166,6 @@ def _insert_image(content, images, title):
         choices = find_all_indices(content, "</h3>")
     else:
         choices = find_all_indices(content, "</h2>")
-    print(choices)
     choices = choices[1:-1]
     if len(images) > 0:
         selection_indices = random.sample(choices, min(len(choices),len(images)))
