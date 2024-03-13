@@ -171,7 +171,6 @@ class GPTAssistant():
                 assistant_id = self.assistant_id
             )
         message_response, status_code = self.wait_for_run_completion(run.id)
-        print(message_response)
         if status_code == 200:
             if "```" in message_response:
                 text = text.replace("```json","")
@@ -188,16 +187,16 @@ class GeminiAssistant():
         genai.configure(api_key=api_key)
         self.instruction = """
             Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
-            Câu trả lời của bạn sẽ ở dạng json với format: {{"title":"Chủ đề bài viết", "sapo":"Tóm tắt nội dung bài viết trong 2-3 câu", "content":"Nội dung chính của bài viết dưới dạng html"}}
+            Câu trả lời của bạn sẽ ở dạng json với format: {{"title":"Chủ đề bài viết", "sapo":"Tóm tắt nội dung bài viết trong 2-3 câu", "content":"Nội dung chính của bài viết"}}. Phần nội dung chính của bài viết có định dạng html với các đầu mục là thẻ h3
             \n\n\n Bài viết 1: {article1}
             \n\n\n Bài viết 2: {article2}
             \n\n\n Câu trả lời của bạn: \n
         """
         self.generation_config = {
-            "temperature": 0.9,
+            "temperature": 0.8,
             "top_p": 1,
-            "top_k": 1,
-            "max_output_tokens": 2048,
+            "top_k": 2,
+            "max_output_tokens": 5000,
             }
         self.safety_settings = [
             {
@@ -241,6 +240,9 @@ class GeminiAssistant():
         convo.send_message(message_input)
         text = convo.last.text
         if text is not None:
+            if "```json" in text:
+                text = text.replace("```json","")
+                text = text.replace("```","")
             return json.loads(text), 200
         else:
             return message_response, 500
