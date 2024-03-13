@@ -134,3 +134,58 @@ def get_images(url):
         url = image['src']
         urls.append(url)
     return urls
+
+def create_image_tag(url, title):
+    return f"""<img alt="{title}" src="{url}">"""
+
+def find_all_indices(string, substring):
+    """
+    Finds all indices of a substring within a string.
+
+    Args:
+        string: The string to search.
+        substring: The substring to find.
+
+    Returns:
+        A list of all starting indices of the substring within the string.
+    """
+    indices = []
+    i = 0
+    while i < len(string):
+        index = string.find(substring, i)
+        if index == -1:
+            break
+        indices.append(index)
+        i = index + 1
+    return indices
+
+def _insert_image(content, images, title):
+    if "</h3>" in content:
+        choices = find_all_indices(content, "</h3>")
+    else:
+        choices = find_all_indices(content, "</h2>")
+    print(choices)
+    choices = choices[1:-1]
+    if len(images) > 0:
+        selection_indices = random.sample(choices, min(len(choices),len(images)))
+        selection_indices.sort()
+        print(selection_indices)
+        text = ""
+        for i in range(len(selection_indices)):
+            image = images[i]
+            if i > 0:
+                text += content[selection_indices[i-1]:selection_indices[i] + 5] + create_image_tag(image, title)
+            else:
+                text += content[0:selection_indices[i] + 5] + create_image_tag(image, title)
+    else:
+        text = content
+    return text
+
+def insert_image(data):
+    article = data['article']
+    title = article['title']
+    content = article['content']
+    images = article['images']
+    content =  _insert_image(content, images[1:], title)
+    content = create_image_tag(images[0], title) + content
+    data['article']['content'] = content

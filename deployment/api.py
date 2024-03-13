@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from deployment.backend import Generate, get_images
+from deployment.backend import Generate, get_images, insert_image
 import logging
 from configs.common_configs import APIConfig
 from pydantic import BaseModel
@@ -63,6 +63,7 @@ def get_article() -> dict:
                 },
                 "references": urls
                 }
+            insert_image(data)
             response['data'] = data
         else:
             response['status_code'] = status_code
