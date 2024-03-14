@@ -188,15 +188,21 @@ class GeminiAssistant():
         self.max_retry = max_retry
         os.environ['GOOGLE_API_KEY'] = api_key
         genai.configure(api_key=api_key)
+        # self.instruction = """
+        #     Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
+        #     Câu trả lời của bạn sẽ ở dạng json với format: {{"title":"Chủ đề bài viết", "sapo":"Tóm tắt nội dung bài viết trong 2-3 câu", "content":"Nội dung chính của bài viết"}}. Phần nội dung chính của bài viết có định dạng html với các đầu mục là thẻ h3
+        #     \n\n\n Bài viết 1: {article1}
+        #     \n\n\n Bài viết 2: {article2}
+        #     \n\n\n Câu trả lời của bạn: \n
+        # """
         self.instruction = """
-            Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
+            Bạn sẽ viết lại bài viết dưới đây theo một cách viết mới hoàn toàn dựa trên những thông tin cho trước. Các bài viết này phải tốt cho SEO. Câu trả lời có độ dài tương tự như bài viết gốc.
             Câu trả lời của bạn sẽ ở dạng json với format: {{"title":"Chủ đề bài viết", "sapo":"Tóm tắt nội dung bài viết trong 2-3 câu", "content":"Nội dung chính của bài viết"}}. Phần nội dung chính của bài viết có định dạng html với các đầu mục là thẻ h3
-            \n\n\n Bài viết 1: {article1}
-            \n\n\n Bài viết 2: {article2}
+            \n\n\n Bài viết cho trước: {article1}
             \n\n\n Câu trả lời của bạn: \n
         """
         self.generation_config = {
-            "temperature": 0.8,
+            "temperature": 0.7,
             "top_p": 1,
             "top_k": 2,
             "max_output_tokens": 5000,
@@ -238,7 +244,7 @@ class GeminiAssistant():
     @cached(ttl= 120)
     def get_response(self, article1, article2, article3):
         message_response = None
-        article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)
+        # article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)
         message_input = self.instruction.format(article1 = article1, article2 = article2, article3 = article3)
         convo = self.client.start_chat(history=[])
         convo.send_message(message_input)

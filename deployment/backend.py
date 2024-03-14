@@ -118,9 +118,10 @@ class Generate():
         return new_article, urls[:2], status_code
     
     def generate_from_text(self, article: str):
-        related_items, urls = self.find_related(article)
-        new_article, status_code = self.generator.get_response(article,  related_items[0], related_items[1])
-        return new_article, urls[:2], status_code
+        # related_items, urls = self.find_related(article)
+        # new_article, status_code = self.generator.get_response(article,  related_items[0], related_items[1])
+        new_article, status_code = self.generator.get_response(article, "", "")
+        return new_article, [], status_code
 
 def get_images(url):
     html = requests.get(url)
@@ -170,7 +171,6 @@ def _insert_image(content, images, title):
     if len(images) > 0:
         selection_indices = random.sample(choices, min(len(choices),len(images)))
         selection_indices.sort()
-        print(selection_indices)
         text = ""
         for i in range(len(selection_indices)):
             image = images[i]
