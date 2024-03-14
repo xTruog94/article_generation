@@ -93,7 +93,7 @@ class Generate():
         slug = url.split("/")[3]
         return self.cate_slug_to_name[slug]
     
-    @cached(ttl= 120)
+    @cached(ttl= 60)
     def get_random_article_from_es(self):
         content = ''
         while content == '':
