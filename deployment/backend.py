@@ -178,6 +178,8 @@ def _insert_image(content, images, title):
                 text += content[selection_indices[i-1]:selection_indices[i] + 5] + create_image_tag(image, title)
             else:
                 text += content[0:selection_indices[i] + 5] + create_image_tag(image, title)
+        if selection_indices[-1] < len(content):
+            text += content[selection_indices[-1]+5:]
     else:
         text = content
     return text
