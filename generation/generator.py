@@ -269,8 +269,6 @@ class GeminiAssistant():
         convo = self.client.start_chat(history=[])
         convo.send_message(message_input)
         text = convo.last.text
-        # print(type(text), text)
-        
         title = ""
         sapo = ""
         content = ""
@@ -287,7 +285,6 @@ class GeminiAssistant():
             "sapo": sapo,
             "content": content
         }
-        print(text_object)
         if text is not None:
             return text_object, 200
         else:
