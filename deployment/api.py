@@ -73,6 +73,8 @@ def get_article() -> dict:
     except Exception as e:
         response['status_code'] = 500
         response['message'] = str(e)
+    title = article_from_es.get("title", "Error")
+    logger.info(f"Generate image with status {status_code} with {title}")
     return response
 
 @app.get("/get_category", tags=["Category"])
