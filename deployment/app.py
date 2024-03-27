@@ -40,7 +40,7 @@ data_json = {
     "type_article": type_article
 }
 
-if st.button("Generate"):
+if st.button("Tạo bài viết"):
     response = get_review(data_json)
     if response:
         new_article = response['data']['article']
