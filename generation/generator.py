@@ -8,7 +8,6 @@ import os
 import textwrap
 import google.generativeai as genai
 from memoization import cached
-import markdown
 
 class PromptGenerate():
 
@@ -18,9 +17,9 @@ class PromptGenerate():
         self.header = {"Cookie": cookie}
         self.assistant_id = assistant_id
         self.instruction = """
-            Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
-            \n\n\n Bài viết 1: {article1}
-            \n\n\n Bài viết 2: {article2} 
+            Bạn sẽ viết lại một bài mô tả sản phẩm từ bài viết và thông tin sản phẩm được cho dưới đây. Bài viết có. Các bài viết này phải tốt cho SEO.
+            \n\n\n Thông tin sản phẩm: {product}
+            \n\n\n Bài viết: {article1}
         """
         self.thread_id = self.new_thread_id(10)
 
@@ -196,34 +195,26 @@ class GPTAssistant():
 
 class GeminiAssistant():
 
-    def __init__(self, api_key, max_retry=3, **generation_config):
-        self.max_retry = max_retry
+    def __init__(self, 
+                 api_key: str, 
+                 temperature: float = 0.7,
+                 top_p: float = 0.9,
+                 top_k: int = 1,
+                 max_output_tokens: int = 5000
+                 ):
         os.environ['GOOGLE_API_KEY'] = api_key
         genai.configure(api_key=api_key)
-        # self.instruction = """
-        #     Bạn sẽ tổng hợp thông tin về cùng 1 chủ đề từ các bài viết dưới đây. Nếu có một bài khác chủ đề với các bài còn lại, bài đấy sẽ bị loại bỏ. Viết lại một bài viết mới hoàn toàn từ các thông tin được cho trong các bài dưới đây. Các bài viết này phải tốt cho SEO.
-        #     Câu trả lời của bạn sẽ ở dạng json với format: {{"title":"Chủ đề bài viết", "sapo":"Tóm tắt nội dung bài viết trong 2-3 câu", "content":"Nội dung chính của bài viết"}}. Phần nội dung chính của bài viết có định dạng html với các đầu mục là thẻ h3
-        #     \n\n\n Bài viết 1: {article1}
-        #     \n\n\n Bài viết 2: {article2}
-        #     \n\n\n Câu trả lời của bạn: \n
-        # """
         self.instruction = """
-            Bạn sẽ viết lại bài viết dưới đây theo một cách viết mới hoàn toàn dựa trên những thông tin cho trước. Các bài viết này phải tốt cho SEO. Câu trả lời có độ dài 5000 ký tự.
-            Câu trả lời của bạn có format với tên và giải thích như sau:***
-            Tiêu đề: chủ đề của bài viết
-            
-            Tóm tắt: tóm tắt nội dung bài viết trong 2-3 câu
-            
-            Nội dung: nội dung chính của bài viết ở dạng html với các đầu mục là thẻ h3
-            ***
-            \n\n\n Bài viết cho trước: {article1}
-            \n\n\n Câu trả lời của bạn: \n
+            Bạn sẽ viết lại bài viết dưới đây theo một cách viết mới hoàn toàn dựa trên những thông tin sản phẩm và bài viết cho trước. Bài viết cần mô tả đúng về sản phẩm trong phần thông tin sản phẩm. Các bài viết này phải tốt cho SEO. Câu trả lời có độ dài 5000 ký tự.
+             \n\n\n Thông tin sản phẩm: {product_infor}
+            \n\n\n Bài viết cho trước: {article}
+            \n\n\n Bài viết của bạn: \n
         """
         self.generation_config = {
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "top_k": 1,
-            "max_output_tokens": 5000,
+            "temperature": temperature,
+            "top_p": top_p,
+            "top_k": top_k,
+            "max_output_tokens": max_output_tokens,
         }
         self.safety_settings = [
             {
@@ -261,29 +252,17 @@ class GeminiAssistant():
         return args
 
     @cached(ttl=60)
-    def get_response(self, article1, article2, article3):
+    def get_response(self, product_information, article):
         message_response = None
-        # article1, article2, article3 = self._crop(article1, article2, article3, max_length = 512)
         message_input = self.instruction.format(
-            article1=article1, article2=article2, article3=article3)
+            product_infor = str(product_information), 
+            article = article
+        )
         convo = self.client.start_chat(history=[])
         convo.send_message(message_input)
         text = convo.last.text
-        title = ""
-        sapo = ""
-        content = ""
-        text = text.split("**Nội dung:**")
-        content = markdown.markdown(text[1])
-        ts = text[0]
-        title_sapo = ts.split("**Tóm tắt:**")
-        sapo = title_sapo[1]
-        title = title_sapo[0]
-        title = title.replace("Tiêu đề:","").replace("*","").replace("\n","")
-        sapo = sapo.replace("Tóm tắt:","").replace("*","").replace("\n","")
         text_object = {
-            "title": title,
-            "sapo": sapo,
-            "content": content
+            "content": text
         }
         if text is not None:
             return text_object, 200

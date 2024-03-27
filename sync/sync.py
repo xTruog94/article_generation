@@ -35,7 +35,7 @@ if __name__ ==  "__main__":
     list_es_data = []
     for row in data:
         es_data = {}
-        _id, hash_url, domain, url, title, content, tags, description, insertDate = row
+        _id, hash_url, domain, url, title, content, tags, description, images, article_type, insertDate = row
         title = cleaner.clean_space(title)
         description = cleaner.clean(description)
         content = cleaner.clean(content)
@@ -46,6 +46,8 @@ if __name__ ==  "__main__":
         es_data['title'] = title
         es_data['content'] = content
         es_data['tags'] = tags
+        es_data['images'] = images
+        es_data['article_type'] = article_type
         es_data['insertDate'] = insertDate.strftime("%Y-%m-%d %H:%M:%s")[:19]
         list_es_data.append(es_data)
         if len(list_es_data) > 0 and len(list_es_data) % 200 == 0:

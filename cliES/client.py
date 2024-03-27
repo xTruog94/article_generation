@@ -28,17 +28,62 @@ class ElasticClient:
             res.append({
                 "title": hit["_source"]["title"],
                 "content": hit["_source"]["content"],
-                "url": hit["_source"]["url"]
+                "url": hit["_source"]["url"],
+                "images": hit["_source"]["images"]
             })
         return res
 
-    def get_article(self, term):
+    def get_article(self, name, code, keywords, domain, type_article):
+        must_include = name + " " + code
+        if domain != "":
+            must_script = [
+                                {
+                                    "match": {
+                                        "domain": domain
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "content": must_include
+                                    }
+                                } 
+                            ]
+        else:
+            must_script = [
+                                {
+                                    "match": {
+                                        "content": must_include
+                                    }
+                                }
+                            ]
+        should_script = []
+        if keywords != "":
+           should_script.append(
+               {
+                            "match": {
+                                "content": keywords
+                            }
+                        }
+           )
+        if type_article != "":
+            should_script.append(
+               {
+                            "match": {
+                                "article_type": type_article
+                            }
+                        }
+           )
         script = {
-                    "match":{
-                        "content":term
+                    "size": 1,
+                    "track_total_hits" : True,
+                    "query": {
+                        "bool":{
+                            "must": must_script,
+                            "should": should_script
+                        }
                     }
                 }
-        res = self.base_query(script)
+        res = self.base_query(script, is_addional_script= False)
         return res
     
     

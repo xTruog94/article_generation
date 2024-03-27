@@ -22,7 +22,15 @@ app = FastAPI()
 class Article(BaseModel):
     content:str
     category: str = None
-    
+
+class Product(BaseModel):
+    name:str
+    code: str = ""
+    keywords: str = ""
+    description: str = ""
+    domain: str = "dienmayxanh.com"
+    type_article: str = "product_information"
+  
 base_response = {
     "status_code": 200,
     "data": None,
@@ -33,65 +41,35 @@ def healthcheck():
     return {"status":"ok"}
 
 @app.post("/generate_article", tags=["Article"])
-def gen_article(article: Article) -> dict:
+def get_article(product: Product) -> dict:
     response = base_response.copy()
     try:
-        new_article, urls = generator.generate_from_text(article.content)
-        data = {
-            "article": new_article,
-            "references": urls
-            }
-        response['data'] = data
-    except Exception as e:
-        response['status_code'] = 500
-        response['message'] = str(e)
-    return response
-
-@app.get("/get_article", tags=["Article"])
-def get_article() -> dict:
-    response = base_response.copy()
-    try:
-        article_from_es = generator.get_random_article_from_es()
-        new_article, urls, status_code = generator.generate_from_text(article_from_es['content'])
+        new_article, urls, status_code, ref_article_url, images = generator.generate(
+            name = product.name,
+            code = product.code,
+            keywords = product.keywords,
+            description = product.description,
+            domain = product.domain,
+            type_article = product.type_article
+        )
         if status_code == 200:
-            new_article['category'] = article_from_es['category']
-            new_article['images'] = get_images(article_from_es['url'])
             data = {
                 "article": new_article,
                 "source":{
-                    "domain": generator.master_domain,
-                    "url": article_from_es['url'],
-                    "title": article_from_es['title']
+                    "domain": product.domain,
+                    "url": ref_article_url
                 },
-                "references": urls
+                "images": images
                 }
-            insert_image(data)
             response['data'] = data
         else:
             response['status_code'] = status_code
             response['message'] = new_article
     except Exception as e:
+        status_code = 500
         response['status_code'] = 500
         response['message'] = str(e)
-    title = article_from_es.get("title", "Error")
-    logger.info(f"Generate image with status {status_code} with {title}")
-    return response
-
-@app.get("/get_category", tags=["Category"])
-def get_category(domain: str = "hellobacsi.com") -> dict:
-    category_mapping = json.load(open("deployment/mapping_category.json"))
-    category = {}
-    for item in category_mapping:
-        if item['domain'] == domain:
-            category = item["categories"]
-            break
-    all_cate = list(category.values())
-    response = base_response.copy()
-    try:
-        response['data'] = all_cate
-    except Exception as e:
-        response['status_code'] = 500
-        response['message'] = str(e)
+    logger.info(f"Generate image with status {status_code} with {product.name} - {product.code} - {product.keywords} - {product.domain}")
     return response
 
 uvicorn.run(app, 
