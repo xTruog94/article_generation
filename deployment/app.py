@@ -1,26 +1,55 @@
 import streamlit as st
-from deployment.backend import Majority, Generate
+import requests
+from deployment.backend import Generate
 
+def get_review(data:dict):
+    r = requests.post("http://172.22.0.52:8000/generate_article", json = data)
+    if r.status_code == 200:
+        return r.json()
+    return None
 
-major_site = Majority()
-generator = Generate()
-categories = major_site.all_categories
-st.header('')
+st.header('King of Product Review')
 
-category = st.selectbox('Lựa chọn chuyên mục',options = categories)
+temperature = st.slider("temparature", min_value = 0.0, max_value=1.0, value = 0.9, step = 0.1)
+top_p = st.slider("top_p", min_value = 0.0, max_value=1.0, value = 0.9, step = 0.1)
+top_k = st.slider("top_k", min_value = 0, max_value=10, value = 1, step = 1)
 
-articles, urls = major_site.get_article_by_cate(category)
-article_selected = st.selectbox('Lựa chọn bài viết mẫu',options = articles)
-article_index = articles.index(article_selected)
-article_url = urls[article_index]
+generator = Generate( 
+                 policy = "gemini",
+                 temperature = temperature,
+                 top_p = top_p,
+                 top_k = top_k,
+                 max_output_tokens = 5000
+                )
+name = st.text_input("Tên sản phẩm")
+code = st.text_input("Mã sản phẩm")
+keywords = st.text_input("Từ khóa mong muốn xuất hiện trong bài")
+domain = st.text_input("Tên miền lấy bài", value = "dienmayxanh.com")
+type_article = st.selectbox("Loại bài", ["Thông tin sản phẩm","Review sản phẩm"])
+if type_article == "Thông tin sản phẩm":
+    type_article = "product_information"
+else:
+    type_article = "product_review"
+    
+data_json = {
+    "name":name,
+    "code": code,
+    "keywords": keywords,
+    "description": "",
+    "domain":domain,
+    "type_article": type_article
+}
 
 if st.button("Generate"):
-    new_article, urls = generator.generate_from_url(article_url)
-    if new_article is None:
-        st.write("Việc xuất bản gặp chút vấn đề. Vui lòng thử với bài viết khác!")
+    response = get_review(data_json)
+    if response:
+        new_article = response['data']['article']
+        if new_article is None:
+            st.write("Việc xuất bản gặp chút vấn đề. Vui lòng thử với bài viết khác!")
+        else:
+            new_article = new_article.get("content", "")
+            st.write("#### Bài AI review")
+            st.caption(f"Độ dài bài viết: {len(new_article.replace("\n",""))}")
+            st.markdown(new_article)
     else:
-        st.write("#### Link các bài viết liên quan")
-        st.write(article_url)
-        for url in urls:
-            st.write(url)
-        st.write(new_article)
+        st.write("Việc xuất bản gặp chút vấn đề. Vui lòng thử với bài viết khác!")

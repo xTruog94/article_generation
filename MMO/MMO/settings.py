@@ -9,11 +9,11 @@
 
 BOT_NAME = "MMO"
 
-SPIDER_MODULES = ["MMO.spiders", "MMO.spiders.health"]
+SPIDER_MODULES = ["MMO.spiders", "MMO.spiders.product"]
 NEWSPIDER_MODULE = "MMO.spiders"
 ##push elastic
 ITEM_PIPELINES = {
-    'MMO.pipelines.MysqlHealthPipeline': 500
+    'MMO.pipelines.MysqlWssPipeline': 500
 }
 # ITEM_PIPELINES = {
 #     'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 500
@@ -25,7 +25,7 @@ ITEM_PIPELINES = {
 # ELASTICSEARCH_TYPE = 'heath'
 # ELASTICSEARCH_UNIQ_KEY = 'url'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "MMO (+http://www.yourdomain.com)"
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True

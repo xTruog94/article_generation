@@ -30,6 +30,15 @@
             "insertDate": {
                 "type": "date",
                 "format": "yyyy-MM-dd HH:mm:ss"
+            },
+            "tags":{
+                "type": "text"
+            },
+            "images":{
+                "type": "text"
+            },
+            "article_type":{
+                "type": "text"
             }
         }
     }

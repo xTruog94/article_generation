@@ -1,11 +1,36 @@
-# Run
+*Readme only for websosanh branch*
 
-## sync DB to ES
+# Pipeline
 
+[![Pipeline processing](./assets/images/pipeline.png)]
+
+# Data Store Elastic
+```json
+"properties": {
+    "id": {
+        "type": "keyword"
+    },
+    "url": {
+        "type":"text"
+    },
+    "domain": {
+        "type":"text"
+    },
+    "title": {
+        "type": "text"
+    },
+    "description": {
+        "type": "text"
+    },
+    "content": {
+        "type": "text"
+    },
+    "insertDate": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+    },
+    "article_type":{
+        "type": "text"
+    }
+}
 ```
-python sync/sync.py -c
-```
-
-## loop
-
-Người dùng chọn 1 chuyên mục -> chọn 1 bài viết trong chuyên mục. Máy sẽ tìm các bài viết tương tự bài được chọn -> generate bài mới.

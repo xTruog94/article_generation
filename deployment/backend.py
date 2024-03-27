@@ -45,7 +45,13 @@ class Majority:
     
 class Generate():
     
-    def __init__(self, master_domain = "hellobacsi.com", policy = "free"):
+    def __init__(self, 
+                 policy = "free",
+                 temperature: float = 0.7,
+                 top_p: float = 0.9,
+                 top_k: int = 1,
+                 max_output_tokens: int = 5000
+                 ):
         self.es_cli = ElasticClient(
             host = sc.ElasticConfig.host, 
             port = sc.ElasticConfig.port, 
@@ -68,16 +74,12 @@ class Generate():
         elif policy == "gemini":
             self.generator = GeminiAssistant(
                 api_key = sc.GoogleConfig.api_key,
-                max_retry = 3
+                temperature = temperature,
+                top_p = top_p,
+                top_k = top_k,
+                max_output_tokens = max_output_tokens
                 
             )
-        self.cate_slug_to_name = None
-        self.master_domain = master_domain
-        category_mapping = json.load(open("deployment/mapping_category.json"))
-        for item in category_mapping:
-            if item['domain'] == master_domain:
-                self.cate_slug_to_name = item["categories"]
-                break
             
     def get_article_from_url(self, url):
         full_article = []
@@ -104,12 +106,13 @@ class Generate():
             article['category'] = self.get_category(article['url'])
         return article
     
-    def find_related(self, text, max_length  = 512):
-        text = text[:max_length]
-        related_article = self.es_cli.get_article(text)
-        articles = [x['content'] for x in related_article]
-        urls = [x['url'] for x in related_article]
-        return articles, urls
+    def find_related(self, name, code = "", keywords = "", domain = "", type_article = 'product_information'):
+        related_article = self.es_cli.get_article(name, code, keywords, domain, type_article)
+        title, content, url, images = "", "", "", []
+        if len(related_article) > 0:
+            data = related_article[0]
+            title, content, url, images = data['title'], data['content'], data['url'], data['images']
+        return title, content, url, images
     
     def generate_from_url(self, url: str):
         article = self.get_article(url)
@@ -117,11 +120,22 @@ class Generate():
         new_article, status_code = self.generator.get_response(article,  related_items[0], related_items[1])
         return new_article, urls[:2], status_code
     
-    def generate_from_text(self, article: str):
-        # related_items, urls = self.find_related(article)
-        # new_article, status_code = self.generator.get_response(article,  related_items[0], related_items[1])
-        new_article, status_code = self.generator.get_response(article, "", "")
-        return new_article, [], status_code
+    def generate(self,
+                 name: str,
+                 code: str = "",
+                 keywords: str = "",
+                 description: str = "",
+                 domain: str = "",
+                 type_article: str = "product_information"):
+        title, content, url, images = self.find_related(name, code, keywords, domain, type_article)
+        product_information = {
+            "product_name": name,
+            "product_code": code,
+            "keywords": keywords,
+            "description": description
+        }
+        new_article, status_code = self.generator.get_response(product_information, content)
+        return new_article, [], status_code, url, images
 
 def get_images(url):
     html = requests.get(url)
